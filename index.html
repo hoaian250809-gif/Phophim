@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHỐ PHIM (phophim.top) - Nền Tảng Xem & Đăng Phim Trực Tuyến</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#E50914',
+                            darkRed: '#B81D24',
+                            gold: '#FFC107',
+                            black: '#0D0D0F',
+                            cardBg: '#16161A',
+                            border: '#26262E'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0D0D0F; }
+        ::-webkit-scrollbar-thumb { background: #26262E; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #E50914; }
+
+        .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .movie-card:hover { transform: translateY(-8px) scale(1.02); }
+
+        .backdrop-blur-custom {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+    </style>
+</head>
+<body class="bg-brand-black text-gray-100 font-sans min-h-screen flex flex-col selection:bg-brand-red selection:text-white">
+
+    <!-- TOP ADMIN CONTROL DASHBOARD BAR (Hiển thị khi Admin kích hoạt) -->
+    <div id="adminTopBanner" class="hidden bg-gradient-to-r from-red-950 via-brand-darkRed to-red-950 text-white px-4 py-2 border-b border-red-700/50">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between text-xs font-medium gap-2">
+            <div class="flex items-center gap-3">
+                <span class="bg-red-500 text-white font-black px-2 py-0.5 rounded text-[10px] uppercase tracking-widest animate-pulse">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Admin Mode Active
+                </span>
+                <span id="statTotalMovies">Tổng phim: 0</span> • 
+                <span id="statTotalViews">Lượt xem: 0</span> • 
+                <span id="statFeatured">Nổi bật: 0</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="openAddMovieModal()" class="bg-white text-brand-black font-bold px-3 py-1 rounded-lg hover:bg-gray-200 transition">
+                    <i class="fa-solid fa-plus text-brand-red mr-1"></i> Thêm Phim Mới
+                </button>
+                <button onclick="openChangePassModal()" class="bg-black/40 hover:bg-black/70 text-white px-3 py-1 rounded-lg border border-white/20 transition">
+                    <i class="fa-solid fa-key mr-1"></i> Đổi MK Admin
+                </button>
+                <button onclick="toggleAdminAuth(false)" class="bg-red-900/80 hover:bg-red-900 text-white px-3 py-1 rounded-lg transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Đăng Xuất
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-custom border-b border-brand-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            
+            <!-- Logo Brand -->
+            <div class="flex items-center gap-6">
+                <a href="#" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-red to-orange-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-brand-red/30 group-hover:scale-105 transition">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl sm:text-2xl font-black tracking-tight text-white group-hover:text-brand-red transition">PHỐ<span class="text-brand-red">PHIM</span></span>
+                        <span class="block text-[9px] text-gray-400 font-semibold tracking-widest uppercase -mt-1">phophim.top</span>
+                    </div>
+                </a>
+
+                <!-- Category Navigation -->
+                <nav class="hidden lg:flex items-center gap-4 text-xs font-semibold">
+                    <button onclick="setCategoryFilter('All')" class="cat-nav-btn text-brand-red px-3 py-1.5 rounded-lg bg-brand-red/10 border border-brand-red/20 transition">Tất Cả</button>
+                    <button onclick="setCategoryFilter('Hành Động')" class="cat-nav-btn text-gray-400 hover:text-white px-3 py-1.5 transition">Hành Động</button>
+                    <button onclick="setCategoryFilter('Tình Cảm')" class="cat-nav-btn text-gray-400 hover:text-white px-3 py-1.5 transition">Tình Cảm</button>
+                    <button onclick="setCategoryFilter('Viễn Tưởng')" class="cat-nav-btn text-gray-400 hover:text-white px-3 py-1.5 transition">Viễn Tưởng</button>
+                    <button onclick="setCategoryFilter('Kinh Dị')" class="cat-nav-btn text-gray-400 hover:text-white px-3 py-1.5 transition">Kinh Dị</button>
+                    <button onclick="setCategoryFilter('Hoạt Hình')" class="cat-nav-btn text-gray-400 hover:text-white px-3 py-1.5 transition">Hoạt Hình</button>
+                    <button onclick="setCategoryFilter('Phim Bộ')" class="cat-nav-btn text-gray-400 hover:text-white px-3 py-1.5 transition">Phim Bộ</button>
+                </nav>
+            </div>
+
+            <!-- Realtime Search & Admin Button -->
+            <div class="flex items-center gap-3">
+                <div class="relative w-36 sm:w-60">
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Tìm tên phim trên phophim.top..." 
+                        class="w-full bg-brand-cardBg border border-gray-700/80 rounded-full py-1.5 pl-9 pr-4 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-red transition">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-400"></i>
+                </div>
+
+                <button id="adminLoginToggleBtn" onclick="toggleAdminAuthModal()" 
+                    class="bg-brand-cardBg hover:bg-gray-800 text-gray-300 text-xs px-3 py-2 rounded-full border border-gray-700 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-user-gear text-brand-red"></i>
+                    <span id="adminBtnLabel" class="hidden sm:inline font-semibold">Admin Login</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Categories Horizontal Bar -->
+        <div class="lg:hidden flex overflow-x-auto px-4 py-2 gap-2 text-xs border-t border-brand-border scrollbar-none">
+            <button onclick="setCategoryFilter('All')" class="px-3 py-1 bg-brand-red text-white rounded-full font-semibold whitespace-nowrap">Tất Cả</button>
+            <button onclick="setCategoryFilter('Hành Động')" class="px-3 py-1 bg-brand-cardBg text-gray-300 rounded-full whitespace-nowrap">Hành Động</button>
+            <button onclick="setCategoryFilter('Tình Cảm')" class="px-3 py-1 bg-brand-cardBg text-gray-300 rounded-full whitespace-nowrap">Tình Cảm</button>
+            <button onclick="setCategoryFilter('Viễn Tưởng')" class="px-3 py-1 bg-brand-cardBg text-gray-300 rounded-full whitespace-nowrap">Viễn Tưởng</button>
+            <button onclick="setCategoryFilter('Kinh Dị')" class="px-3 py-1 bg-brand-cardBg text-gray-300 rounded-full whitespace-nowrap">Kinh Dị</button>
+            <button onclick="setCategoryFilter('Hoạt Hình')" class="px-3 py-1 bg-brand-cardBg text-gray-300 rounded-full whitespace-nowrap">Hoạt Hình</button>
+            <button onclick="setCategoryFilter('Phim Bộ')" class="px-3 py-1 bg-brand-cardBg text-gray-300 rounded-full whitespace-nowrap">Phim Bộ</button>
+        </div>
+    </header>
+
+    <!-- HERO FEATURED BANNER -->
+    <section id="heroBanner" class="relative w-full h-[50vh] md:h-[65vh] bg-cover bg-center transition-all duration-700 bg-gray-900">
+        <div class="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/50 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-brand-black via-brand-black/80 to-transparent"></div>
+
+        <div class="relative max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex flex-col justify-end pb-10 z-10">
+            <div class="max-w-2xl space-y-3">
+                <div class="flex items-center gap-2">
+                    <span class="bg-brand-red text-white text-[11px] font-black px-2.5 py-0.5 rounded uppercase tracking-widest shadow" id="heroBadge">PHIM NỔI BẬT</span>
+                    <span class="text-brand-gold text-xs font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-star"></i> <span id="heroRating">9.0</span>
+                    </span>
+                    <span class="text-gray-300 text-xs" id="heroYear">2026</span>
+                    <span class="text-gray-400 text-xs">• <span id="heroCountry">Âu Mỹ</span></span>
+                </div>
+
+                <h1 id="heroTitle" class="text-3xl sm:text-5xl font-black text-white tracking-tight line-clamp-2">
+                    Chào Mừng Đến Với Phố Phim
+                </h1>
+
+                <p id="heroDesc" class="text-gray-300 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                    Nền tảng xem phim trực tuyến hoàn toàn miễn phí tại phophim.top. Cập nhật liên tục phim chiếu rồng, phim bộ, phim lẻ mới nhất.
+                </p>
+
+                <div class="flex items-center gap-3 pt-3">
+                    <button id="heroPlayBtn" onclick="playHeroMovie()" class="bg-brand-red hover:bg-brand-darkRed text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-xl shadow-brand-red/40 hover:scale-105 transition">
+                        <i class="fa-solid fa-play"></i> Xem Ngay
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
+
+        <!-- Controls Bar (Filters & Sorting) -->
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-brand-border pb-4">
+            <h2 id="sectionTitle" class="text-lg sm:text-2xl font-bold flex items-center gap-2">
+                <span class="w-1.5 h-6 bg-brand-red rounded-full"></span>
+                <span>Tất Cả Phim Trên PHỐ PHIM</span>
+            </h2>
+
+            <div class="flex flex-wrap items-center gap-3 text-xs">
+                <!-- Filter Country -->
+                <select id="countrySelect" onchange="renderMoviesGrid()" class="bg-brand-cardBg border border-gray-700 text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand-red">
+                    <option value="All">Tất cả quốc gia</option>
+                    <option value="Âu Mỹ">Âu Mỹ</option>
+                    <option value="Hàn Quốc">Hàn Quốc</option>
+                    <option value="Trung Quốc">Trung Quốc</option>
+                    <option value="Nhật Bản">Nhật Bản</option>
+                    <option value="Việt Nam">Việt Nam</option>
+                </select>
+
+                <!-- Sort Order -->
+                <select id="sortSelect" onchange="renderMoviesGrid()" class="bg-brand-cardBg border border-gray-700 text-white rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand-red">
+                    <option value="newest">Mới cập nhật</option>
+                    <option value="views">Lượt xem nhiều nhất</option>
+                    <option value="rating">Điểm IMDb cao nhất</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Movies Grid -->
+        <div id="moviesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
+            <!-- Movie cards injected dynamically -->
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="text-center py-20">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-brand-red"></i>
+            <p class="text-xs text-gray-400 mt-3 font-semibold">Đang tải dữ liệu từ phophim.top...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16 bg-brand-cardBg/40 rounded-2xl border border-brand-border">
+            <i class="fa-solid fa-film text-5xl text-gray-600 mb-3"></i>
+            <h3 class="text-base font-semibold text-gray-300">Không tìm thấy phim phù hợp</h3>
+            <p class="text-xs text-gray-500 mt-1">Vui lòng chọn thể loại khác hoặc nhập từ khóa tìm kiếm mới.</p>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-brand-cardBg border-t border-brand-border mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-3">
+            <div class="flex justify-center items-center gap-2">
+                <span class="text-xl font-black text-white">PHỐ<span class="text-brand-red">PHIM</span></span>
+                <span class="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded font-mono">phophim.top</span>
+            </div>
+            <p class="text-xs text-gray-400 max-w-xl mx-auto">Nền tảng phát phim trực tuyến chất lượng cao. Bản quyền thuộc về PHỐ PHIM © 2026. Mọi quyền được bảo lưu.</p>
+            <div class="text-[11px] text-gray-500 pt-2 border-t border-gray-800/80">
+                Quyền hệ thống: <span id="footerAdminStatus" class="font-bold text-gray-400">Khách Xem</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- VIDEO PLAYER MODAL -->
+    <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-custom flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-brand-cardBg w-full max-w-5xl rounded-2xl overflow-hidden shadow-2xl border border-brand-border flex flex-col max-h-[94vh]">
+            <!-- Header -->
+            <div class="flex justify-between items-center px-4 py-3 bg-brand-black border-b border-brand-border">
+                <div class="flex items-center gap-2 truncate">
+                    <span class="bg-brand-red text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase" id="playerEpTitle">TẬP 1</span>
+                    <h3 id="playerModalTitle" class="font-bold text-sm sm:text-base text-white truncate">Tên Phim</h3>
+                </div>
+                <button onclick="closePlayerModal()" class="text-gray-400 hover:text-white text-xl p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Video Frame Box -->
+            <div class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+                <div id="videoContainer" class="w-full h-full"></div>
+            </div>
+
+            <!-- Movie Details & Episode Selector -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-grow">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-brand-border pb-3">
+                    <div class="flex items-center gap-3 text-xs">
+                        <span id="playerRating" class="bg-brand-gold/20 text-brand-gold font-bold px-2.5 py-1 rounded flex items-center gap-1">
+                            <i class="fa-solid fa-star"></i> 9.0
+                        </span>
+                        <span id="playerYear" class="text-gray-400">2026</span>
+                        <span id="playerCountry" class="bg-gray-800 text-gray-300 px-2 py-0.5 rounded">Âu Mỹ</span>
+                        <span id="playerViews" class="text-gray-400"><i class="fa-solid fa-eye text-gray-500"></i> 0 lượt xem</span>
+                    </div>
+
+                    <!-- Admin Tools inside Player -->
+                    <div id="playerAdminControls" class="hidden flex items-center gap-2">
+                        <button id="playerPinBtn" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1 rounded-lg transition font-semibold">
+                            <i class="fa-solid fa-thumbtack"></i> Ghim Banner
+                        </button>
+                        <button id="playerEditBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded-lg transition font-semibold">
+                            <i class="fa-solid fa-pen-to-square"></i> Sửa
+                        </button>
+                        <button id="playerDeleteBtn" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded-lg transition font-semibold">
+                            <i class="fa-solid fa-trash"></i> Xóa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Episode Buttons -->
+                <div id="episodeSection" class="space-y-2">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-ol text-brand-red"></i> Chọn Tập Phim:
+                    </h4>
+                    <div id="episodeList" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <h4 class="text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Nội Dung Phim:</h4>
+                    <p id="playerDescription" class="text-xs sm:text-sm text-gray-300 leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT MOVIE MODAL (ADMIN FULL RIGHTS) -->
+    <div id="movieFormModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-brand-cardBg w-full max-w-2xl rounded-2xl shadow-2xl border border-brand-border overflow-hidden flex flex-col max-h-[92vh]">
+            <div class="flex justify-between items-center px-6 py-4 bg-brand-black border-b border-brand-border">
+                <h3 id="formModalTitle" class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clapperboard text-brand-red"></i> Thêm Phim Mới
+                </h3>
+                <button onclick="closeMovieFormModal()" class="text-gray-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="movieForm" onsubmit="handleMovieFormSubmit(event)" class="p-6 overflow-y-auto space-y-4">
+                <input type="hidden" id="editMovieId" value="">
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Tên Phim *</label>
+                    <input type="text" id="inputTitle" required placeholder="VD: Avatar: Dòng Chảy Của Nước" 
+                        class="w-full bg-brand-black border border-gray-700 rounded-xl px-4 py-2 text-xs sm:text-sm text-white focus:border-brand-red focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1">Thể Loại *</label>
+                        <select id="inputCategory" required class="w-full bg-brand-black border border-gray-700 ro
