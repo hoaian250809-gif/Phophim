@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHỐ PHIM - Nền Tảng Phim Trực Tuyến</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        netflix: { red: '#E50914', dark: '#141414', gray: '#2F2F2F', light: '#E5E5E5' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-netflix-dark text-white min-h-screen font-sans selection:bg-netflix-red selection:text-white">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 bg-netflix-dark/95 backdrop-blur border-b border-netflix-gray/40 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
+                <div class="bg-netflix-red text-white p-2 rounded-lg font-black text-xl flex items-center justify-center shadow-lg shadow-netflix-red/30">
+                    <i class="fa-solid fa-play"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-wider text-white">PHỐ <span class="text-netflix-red">PHIM</span></h1>
+                    <p class="text-[10px] text-gray-400 tracking-widest uppercase">phophim.top</p>
+                </div>
+            </div>
+            
+            <div class="flex-1 max-w-md relative hidden md:block">
+                <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Tìm tên phim, diễn viên..." class="w-full bg-netflix-gray/60 border border-gray-700 text-sm rounded-full py-2 pl-4 pr-10 focus:outline-none focus:border-netflix-red text-white">
+                <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-gray-400 text-sm"></i>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="openAdminModal()" class="flex items-center gap-1.5 bg-netflix-gray/80 hover:bg-netflix-red text-xs font-semibold px-3 py-2 rounded-full transition">
+                    <i class="fa-solid fa-user-gear text-netflix-red group-hover:text-white"></i> Admin
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- BANNER -->
+        <div id="bannerContainer" class="mb-8 rounded-2xl overflow-hidden relative shadow-2xl bg-netflix-gray/40 min-h-[300px] flex items-center justify-center">
+            <div class="text-center text-gray-400">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl text-netflix-red mb-2"></i>
+                <p class="text-sm">Đang tải Phố Phim...</p>
+            </div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-3 mb-6">
+            <button onclick="filterCategory('Tất Cả')" class="cat-btn bg-netflix-red text-white px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition">Tất Cả</button>
+            <button onclick="filterCategory('Hành Động')" class="cat-btn bg-netflix-gray/60 text-gray-300 hover:bg-netflix-gray px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition">Hành Động</button>
+            <button onclick="filterCategory('Tình Cảm')" class="cat-btn bg-netflix-gray/60 text-gray-300 hover:bg-netflix-gray px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition">Tình Cảm</button>
+            <button onclick="filterCategory('Viễn Tưởng')" class="cat-btn bg-netflix-gray/60 text-gray-300 hover:bg-netflix-gray px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition">Viễn Tưởng</button>
+            <button onclick="filterCategory('Hoạt Hình')" class="cat-btn bg-netflix-gray/60 text-gray-300 hover:bg-netflix-gray px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition">Hoạt Hình</button>
+        </div>
+
+        <!-- MOVIE GRID -->
+        <div class="flex items-center justify-between mb-4">
+            <h2 id="sectionTitle" class="text-lg font-bold border-l-4 border-netflix-red pl-3">Phim Mới Cập Nhật</h2>
+        </div>
+        <div id="movieGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <!-- Render movies -->
+        </div>
+    </main>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="adminModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-netflix-dark border border-gray-800 w-full max-w-md rounded-2xl p-6 relative shadow-2xl">
+            <button onclick="closeAdminModal()" class="absolute right-4 top-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-lock text-netflix-red"></i> Đăng Nhập Quản Trị</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Mật khẩu Admin</label>
+                    <input type="password" id="adminPassInput" placeholder="Nhập mật khẩu (admin123)" class="w-full bg-netflix-gray/50 border border-gray-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-netflix-red">
+                </div>
+                <button onclick="verifyAdmin()" class="w-full bg-netflix-red hover:bg-red-700 py-2.5 rounded-lg font-bold text-sm transition">Truy Cập Quản Trị</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT XỬ LÝ -->
+    <script>
+        const DEFAULT_MOVIES = [
+            {
+                id: 1,
+                title: "Thế Giới Hoàn Mỹ",
+                category: "Viễn Tưởng",
+                year: 2026,
+                episodes: "Tập 135",
+                poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+                videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                description: "Hành trình tu chân đỉnh cao, chiến đấu với các thế lực tà ác."
+            },
+            {
+                id: 2,
+                title: "Đấu Phá Thương Khung",
+                category: "Hành Động",
+                year: 2026,
+                episodes: "Tập 102",
+                poster: "https://image.tmdb.org/t/p/w500/6MKr3KgOLmzOP6MSuZERO41Lpkt.jpg",
+                videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                description: "Tiêu Viêm trên con đường lấy lại danh dự gia tộc."
+            }
+        ];
+
+        let movies = JSON.parse(localStorage.getItem('phophim_movies')) || DEFAULT_MOVIES;
+
+        function renderMovies(list) {
+            const grid = document.getElementById('movieGrid');
+            if (!list || list.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">Không tìm thấy phim nào.</div>';
+                return;
+            }
+            grid.innerHTML = list.map(m => `
+                <div class="bg-netflix-gray/20 rounded-xl overflow-hidden border border-gray-800/60 hover:border-netflix-red transition group cursor-pointer" onclick="alert('Đang phát phim: ${m.title}')">
+                    <div class="aspect-[2/3] relative overflow-hidden bg-gray-900">
+                        <img src="${m.poster}" alt="${m.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://via.placeholder.com/300x450?text=PHOPHIM'">
+                        <span class="absolute bottom-2 left-2 bg-black/70 backdrop-blur text-[10px] px-2 py-0.5 rounded text-netflix-red font-bold">${m.episodes}</span>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-sm truncate text-white">${m.title}</h3>
+                        <p class="text-xs text-gray-400 mt-1">${m.category} • ${m.year}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderBanner() {
+            const banner = document.getElementById('bannerContainer');
+            if(movies.length > 0) {
+                const m = movies[0];
+                banner.innerHTML = `
+                    <div class="absolute inset-0">
+                        <img src="${m.poster}" class="w-full h-full object-cover opacity-40 blur-sm">
+                        <div class="absolute inset-0 bg-gradient-to-t from-netflix-dark via-netflix-dark/40 to-transparent"></div>
+                    </div>
+                    <div class="relative z-10 p-6 sm:p-10 max-w-2xl">
+                        <span class="bg-netflix-red text-white text-xs font-bold px-2.5 py-1 rounded mb-3 inline-block">HOT PHỐ PHIM</span>
+                        <h2 class="text-2xl sm:text-4xl font-black mb-2 text-white">${m.title}</h2>
+                        <p class="text-xs sm:text-sm text-gray-300 line-clamp-2 mb-4">${m.description}</p>
+                        <button onclick="alert('Đang phát: ${m.title}')" class="bg-netflix-red hover:bg-red-700 text-white px-6 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 transition shadow-lg shadow-netflix-red/40">
+                            <i class="fa-solid fa-play"></i> Xem Ngay
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function filterCategory(cat) {
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-netflix-red', 'text-white');
+                btn.classList.add('bg-netflix-gray/60', 'text-gray-300');
+            });
+            event.target.classList.remove('bg-netflix-gray/60', 'text-gray-300');
+            event.target.classList.add('bg-netflix-red', 'text-white');
+
+            if (cat === 'Tất Cả') {
+                renderMovies(movies);
+            } else {
+                const filtered = movies.filter(m => m.category === cat);
+                renderMovies(filtered);
+            }
+        }
+
+        function handleSearch(keyword) {
+            const keywordLower = keyword.toLowerCase();
+            const filtered = movies.filter(m => m.title.toLowerCase().includes(keywordLower));
+            renderMovies(filtered);
+        }
+
+        function goHome() {
+            renderMovies(movies);
+            renderBanner();
+        }
+
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function verifyAdmin() {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === 'admin123') {
+                alert('Đăng nhập thành công! (Tính năng quản lý phim đã sẵn sàng)');
+                closeAdminModal();
+            } else {
+                alert('Sai mật khẩu! Mật khẩu mặc định là: admin123');
+            }
+        }
+
+        // Khởi chạy khi load trang
+        window.onload = function() {
+            renderBanner();
+            renderMovies(movies);
+        };
+    </script>
+</body>
+</html>
